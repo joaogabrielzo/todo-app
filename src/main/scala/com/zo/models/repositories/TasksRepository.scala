@@ -18,8 +18,11 @@ class TasksRepository(implicit ec: ExecutionContext) extends Schemas with MSQL {
     def insert(task: Task): Future[Int] =
         db.run(table += task)
     
-    def select(id: Int): Future[Option[Task]] =
+    def selectId(id: Int): Future[Option[Task]] =
         db.run(table.filter(_.id === id).result.headOption)
+    
+    def selectByUser(user: String): Future[Option[Task]] =
+        db.run(table.filter(_.user === user).result.headOption)
     
     def update(task: Task): Future[Int] =
         db.run(table.filter(_.id === task.id).update(task))

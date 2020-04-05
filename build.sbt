@@ -44,5 +44,8 @@ libraryDependencies ++= Seq(
     "com.typesafe.slick" %% "slick-hikaricp" % slick,
     "mysql" % "mysql-connector-java" % "6.0.6",
     "com.h2database" % "h2" % "1.4.192" % "test",
-    "de.mkammerer" % "argon2-jvm" % "2.6"
+    "de.mkammerer" % "argon2-jvm" % "2.6",
+    "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.0",
+    "joda-time" % "joda-time" % "2.7",
+    "org.joda" % "joda-convert" % "1.7"
 )

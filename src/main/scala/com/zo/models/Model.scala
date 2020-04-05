@@ -1,7 +1,8 @@
 package com.zo.models
 
-import java.sql.Date
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.util.Date
 
 import spray.json._
 
@@ -13,13 +14,21 @@ case class User(
                    password: String
                )
 
+object getNow {
+    
+    val formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
+    val currentDatetime = new Date
+    val sqlTimestamp: Timestamp = new Timestamp(currentDatetime.getTime)
+}
+
 case class Task(
                    id: Int = 0,
                    user: String,
                    description: String,
-                   deadline: Date = null,
-                   completed: Boolean
-               )
+                   deadline: Option[Timestamp],
+                   completed: Boolean = false,
+                   createdAt: Timestamp = getNow.sqlTimestamp
+)
 
 trait JsonProtocol extends DefaultJsonProtocol {
     
@@ -27,13 +36,13 @@ trait JsonProtocol extends DefaultJsonProtocol {
     
     implicit val userFormat: RootJsonFormat[User] = jsonFormat3(User)
     
-    implicit val taskFormat: RootJsonFormat[Task] = jsonFormat5(Task)
+    implicit val taskFormat: RootJsonFormat[Task] = jsonFormat6(Task)
 }
 
 class DateMarshalling {
-    implicit object DateFormat extends JsonFormat[Date] {
+    implicit object DateFormat extends JsonFormat[Timestamp] {
         
-        def write(date: Date) = JsString(dateToIsoString(date))
+        def write(date: Timestamp) = JsString(dateToIsoString(date))
         def read(json: JsValue) = json match {
             case JsString(rawDate) =>
                 parseIsoDateString(rawDate)
@@ -43,12 +52,12 @@ class DateMarshalling {
     }
     
     private val localIsoDateFormatter = new ThreadLocal[SimpleDateFormat] {
-        override def initialValue() = new SimpleDateFormat("dd-MM-yyyy")
+        override def initialValue() = new SimpleDateFormat("dd-MM-yyyy HH:mm")
     }
     
-    private def dateToIsoString(date: Date) =
+    private def dateToIsoString(date: Timestamp) =
         localIsoDateFormatter.get().format(date)
     
-    private def parseIsoDateString(date: String): Option[Date] =
-        Try {localIsoDateFormatter.get().parse(date)}.asInstanceOf[Option[Date]]
+    private def parseIsoDateString(date: String): Option[Timestamp] =
+        Try {localIsoDateFormatter.get().parse(date)}.asInstanceOf[Option[Timestamp]]
 }

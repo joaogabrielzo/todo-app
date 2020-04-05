@@ -1,6 +1,6 @@
 package com.zo.models
 
-import java.sql.Date
+import java.sql.Timestamp
 
 import com.zo.config.DB
 import slick.lifted._
@@ -24,9 +24,11 @@ trait Schemas extends DB {
         def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
         def user: Rep[String] = column[String]("user")
         def description: Rep[String] = column[String]("description")
-        def deadline: Rep[Date] = column[Date]("deadline")
+        def deadline: Rep[Timestamp] = column[Timestamp]("deadline")
         def completed: Rep[Boolean] = column[Boolean]("completed")
+        def createdAt: Rep[Timestamp] = column[Timestamp]("created_at")
         
-        def * : ProvenShape[Task] = (id, user, description, deadline, completed) <> (Task.tupled, Task.unapply)
+        def * : ProvenShape[Task] = (id, user, description, deadline.?, completed, createdAt) <> (Task.tupled, Task
+            .unapply)
     }
 }

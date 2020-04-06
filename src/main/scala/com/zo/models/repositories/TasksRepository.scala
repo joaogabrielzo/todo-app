@@ -1,5 +1,9 @@
 package com.zo.models.repositories
 
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import com.zo.config.{DB, MSQL}
 import com.zo.models.{Schemas, Task}
 
@@ -8,6 +12,13 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class TasksRepository(implicit ec: ExecutionContext) extends Schemas with MSQL {
+    
+    private object getNow {
+        
+        val formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
+        val currentDatetime = new Date
+        val sqlTimestamp: Timestamp = new Timestamp(currentDatetime.getTime)
+    }
     
     import driver.api._
     

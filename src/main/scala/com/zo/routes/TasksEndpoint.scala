@@ -4,20 +4,34 @@ import akka.event.slf4j.Logger
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directive1, Route}
+import authentikat.jwt.JsonWebToken
+import com.zo.config.Authentication
 import com.zo.models.repositories.TasksRepository
 import com.zo.models.{JsonProtocol, Task}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-class TasksEndpoint(repo: TasksRepository)(implicit ec: ExecutionContext) extends JsonProtocol
+class TasksEndpoint(repo: TasksRepository)(implicit ec: ExecutionContext) extends Authentication
+                                                                          with JsonProtocol
                                                                           with SprayJsonSupport {
     
     val log = Logger("tasks-endpoint")
     
+    private def authenticated: Directive1[Map[String, Any]] =
+        optionalHeaderValueByName("Authorization").flatMap {
+            case Some(jwt) if isTokenExpired(jwt) =>
+                complete(StatusCodes.Unauthorized -> "Token expired.")
+            
+            case Some(jwt) if JsonWebToken.validate(jwt, secretKey) =>
+                provide(getClaims(jwt).getOrElse(Map.empty[String, Any]))
+            
+            case _ => complete(StatusCodes.Unauthorized)
+        }
+    
     val tasksRoute: Route =
-        pathPrefix("v1" / "tasks") {
+        (pathPrefix("v1" / "tasks") & authenticated) { claims =>
             (post & entity(as[Task])) { task =>
                 onComplete(repo.insert(task)) {
                     case Success(id) =>
@@ -53,13 +67,13 @@ class TasksEndpoint(repo: TasksRepository)(implicit ec: ExecutionContext) extend
             } ~
             (get & path(Segment)) { user =>
                 onComplete(repo.selectByUser(user)) {
-                    case Success(Some(_)) =>
+                    case Success(Some(tasks)) =>
                         log.info(s"Retrieved all tasks for user $user")
-                        complete(StatusCodes.OK)
-                    case Success(None)    =>
+                        complete(tasks)
+                    case Success(None)        =>
                         log.info(s"Didn't retrieve any task for user $user")
                         complete(HttpResponse(StatusCodes.BadRequest, entity = s"User $user doesn't have any task"))
-                    case Failure(ex)      =>
+                    case Failure(ex)          =>
                         log.warn(s"Retrieving task for user $user failed with: $ex")
                         complete(StatusCodes.InternalServerError)
                 }

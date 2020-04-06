@@ -24,11 +24,10 @@ trait Schemas extends DB {
         def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
         def user: Rep[String] = column[String]("user")
         def description: Rep[String] = column[String]("description")
-        def deadline: Rep[Timestamp] = column[Timestamp]("deadline")
-        def completed: Rep[Boolean] = column[Boolean]("completed")
         def createdAt: Rep[Timestamp] = column[Timestamp]("created_at")
+        def completed: Rep[Boolean] = column[Boolean]("completed")
         
-        def * : ProvenShape[Task] = (id, user, description, deadline.?, completed, createdAt) <> (Task.tupled, Task
+        def * : ProvenShape[Task] = (id, user, description, createdAt.?, completed) <> (Task.tupled, Task
             .unapply)
     }
 }

@@ -9,26 +9,21 @@ import spray.json._
 import scala.util.Try
 
 case class User(
-                   id: Int = 0,
+                   id: Int,
                    username: String,
                    password: String
                )
-
-object getNow {
-    
-    val formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-    val currentDatetime = new Date
-    val sqlTimestamp: Timestamp = new Timestamp(currentDatetime.getTime)
-}
-
 case class Task(
-                   id: Int = 0,
+                   id: Int,
                    user: String,
                    description: String,
-                   deadline: Option[Timestamp],
-                   completed: Boolean = false,
-                   createdAt: Timestamp = getNow.sqlTimestamp
-)
+                   createdAt: Option[Timestamp],
+                   completed: Boolean = false
+               )
+case class Login(
+                    username: String,
+                    password: String
+                )
 
 trait JsonProtocol extends DefaultJsonProtocol {
     
@@ -36,7 +31,9 @@ trait JsonProtocol extends DefaultJsonProtocol {
     
     implicit val userFormat: RootJsonFormat[User] = jsonFormat3(User)
     
-    implicit val taskFormat: RootJsonFormat[Task] = jsonFormat6(Task)
+    implicit val taskFormat: RootJsonFormat[Task] = jsonFormat5(Task)
+    
+    implicit val loginFormat: RootJsonFormat[Login] = jsonFormat2(Login)
 }
 
 class DateMarshalling {

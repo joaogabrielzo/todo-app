@@ -40,7 +40,7 @@ class UsersEndpoint(repo: UsersRepository, argon: PasswordEncrypt)(implicit ec: 
                     case Success(false) =>
                         val encryptedPassword: String = argon.encrypt(user.password)
                         
-                        onComplete(repo.insert(User(username = user.username, password = encryptedPassword))) {
+                        onComplete(repo.insert(User(0, user.username, encryptedPassword))) {
                             case Success(_)  =>
                                 log.info(s"User ${user.username} created!")
                                 complete(HttpResponse(StatusCodes.Created,

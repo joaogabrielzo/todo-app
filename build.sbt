@@ -47,5 +47,6 @@ libraryDependencies ++= Seq(
     "de.mkammerer" % "argon2-jvm" % "2.6",
     "com.github.tototoshi" %% "slick-joda-mapper" % "2.4.0",
     "joda-time" % "joda-time" % "2.7",
-    "org.joda" % "joda-convert" % "1.7"
+    "org.joda" % "joda-convert" % "1.7",
+    "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
 )
